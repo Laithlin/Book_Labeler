@@ -1,5 +1,6 @@
 # !/usr/bin/python3
 import os
+import requests
 
 try:
     from googlesearch import search
@@ -7,46 +8,40 @@ except ImportError:
     print("No module named 'google' found")
 
 def cut_extension(file):
-    check_extension(file)
-    file_len = len(file)
-    return file[:(file_len - 4)]
+    ext_len = check_extension(file)
+    return file[:(len(file) - ext_len)]
 
 def check_extension(file):
     # default is pdf, 4 symbols ".pdf"
-    is_rtf_doc_or_docx = False
     extension_len = 4
     ext = file[len(file)-4:len(file)]
-    # print(extension)
-    is_rtf_doc_or_docx = check_rtf_doc_extensions_number(ext)
+    if(ext == "mobi" or ext == "epub"):
+        extension_len = 5
 
-    if(is_rtf_doc_or_docx):
-        print(file)
-
+    return extension_len
 def check_rtf_doc_extensions_number(extension):
     if(extension == ".rtf" or extension == "docx" or extension == ".doc"):
         print(extension)
         return True
 
 def get_books_names():
-    # path_to_books = "/home/justyna/ksiegarnia/test/"
-    path_to_books = "/home/justyna/ksiegarnia/Ebooki/"
+    path_to_books = "/home/justyna/ksiegarnia/test/"
 
     books = list()
-    # directory_list = list()
     for root, dirs, files in os.walk(path_to_books, topdown=False):
         for file in files:
             # print(file)
-            books.append(cut_extension(file))
-        # print(files)
-        # for name in dirs:
-        #     directory_list.append(name)
-        #     os.path.join(root, name)
+            books.append(cut_extension(file) + " lubimyczytac")
+
     return books
 
 def search_in_google(books):
+    urls = []
     for book in books:
-        for j in search(book, tld="co.in", num=10, stop=10, pause=2):
-            print(j)
+        for j in search(book, tld="co.in", num=2, stop=2, pause=5):
+            # print(j)
+            urls.append(j)
+    return urls
 
 # to search
 # query = "Geeksforgeeks"
@@ -56,9 +51,20 @@ def search_in_google(books):
 
 
 library = get_books_names()
+# print(library[0])
+url = search_in_google([library[0]])
+response = requests.get(url[0])
+print(response.text)
+# print(url)
 # print(directory_list)
 # print("Files:")
 # print(library)
+
+try:
+    with open("./file.txt", "x") as f:
+        f.write(response.text)
+except FileExistsError:
+    print("Already exists.")
 
 
 
