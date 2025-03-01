@@ -13,19 +13,31 @@ def cut_extension(file):
 
 def check_extension(file):
     # default is pdf, 4 symbols ".pdf"
+    is_rtf_doc_or_docx = False
     extension_len = 4
-    extension = file[len(file)-4:len(file)]
-    print(extension)
+    ext = file[len(file)-4:len(file)]
+    # print(extension)
+    is_rtf_doc_or_docx = check_rtf_doc_extensions_number(ext)
+
+    if(is_rtf_doc_or_docx):
+        print(file)
+
+def check_rtf_doc_extensions_number(extension):
+    if(extension == ".rtf" or extension == "docx" or extension == ".doc"):
+        print(extension)
+        return True
 
 def get_books_names():
-    path_to_books = "/home/justyna/ksiegarnia/test/"
+    # path_to_books = "/home/justyna/ksiegarnia/test/"
+    path_to_books = "/home/justyna/ksiegarnia/Ebooki/"
 
     books = list()
     # directory_list = list()
     for root, dirs, files in os.walk(path_to_books, topdown=False):
         for file in files:
+            # print(file)
             books.append(cut_extension(file))
-        print(files)
+        # print(files)
         # for name in dirs:
         #     directory_list.append(name)
         #     os.path.join(root, name)
@@ -45,8 +57,8 @@ def search_in_google(books):
 
 library = get_books_names()
 # print(directory_list)
-print("Files:")
-print(library)
+# print("Files:")
+# print(library)
 
 
 
