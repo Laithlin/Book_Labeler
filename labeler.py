@@ -1,6 +1,7 @@
 # !/usr/bin/python3
 import os
 import requests
+from bs4 import BeautifulSoup
 
 try:
     from googlesearch import search
@@ -54,17 +55,19 @@ library = get_books_names()
 # print(library[0])
 url = search_in_google([library[0]])
 response = requests.get(url[0])
-print(response.text)
+# print(response.text)
 # print(url)
 # print(directory_list)
 # print("Files:")
 # print(library)
 
-try:
-    with open("./file.txt", "x") as f:
-        f.write(response.text)
-except FileExistsError:
-    print("Already exists.")
+soup = BeautifulSoup(response.text, 'html.parser')
+print(soup.find_all("a", "book__category d-sm-block d-none"))
+# try:
+#     with open("./file.txt", "x") as f:
+#         f.write(response.text)
+# except FileExistsError:
+#     print("Already exists.")
 
 
 
