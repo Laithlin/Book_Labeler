@@ -44,6 +44,13 @@ def search_in_google(books):
             urls.append(j)
     return urls
 
+def get_book_category(response):
+    soup = BeautifulSoup(response.text, 'html.parser')
+    category_href = soup.find("a", "book__category d-sm-block d-none")
+    # print(category_href)
+    category = category_href.get_text()
+    print(category)
+
 # to search
 # query = "Geeksforgeeks"
 
@@ -53,16 +60,21 @@ def search_in_google(books):
 
 library = get_books_names()
 # print(library[0])
+# url = search_in_google([library[0]])
 url = search_in_google([library[0]])
-response = requests.get(url[0])
+res = requests.get(url[0])
 # print(response.text)
 # print(url)
 # print(directory_list)
 # print("Files:")
 # print(library)
 
-soup = BeautifulSoup(response.text, 'html.parser')
-print(soup.find_all("a", "book__category d-sm-block d-none"))
+get_book_category(res)
+# soup = BeautifulSoup(response.text, 'html.parser')
+# category_href = soup.find("a", "book__category d-sm-block d-none")
+# # print(category_href)
+# category = category_href.get_text()
+# print(category)
 # try:
 #     with open("./file.txt", "x") as f:
 #         f.write(response.text)
