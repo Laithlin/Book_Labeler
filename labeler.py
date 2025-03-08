@@ -3,6 +3,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from progress.bar import Bar, FillingCirclesBar
+import json
 
 try:
     from googlesearch import search
@@ -44,11 +45,12 @@ def get_books_names():
 def search_in_google(books):
     urls = []
     unable_to_find = []
+    lib = {}
     bar = FillingCirclesBar('Processing', max=len(books))
     for book in books:
         start_url_len = len(urls)
 
-        for j in search(book, tld="co.in", num=1, stop=3, pause=5):
+        for j in search(book, tld="co.in", num=3, stop=3, pause=5):
             if(check_url(j)):
                 urls.append(j)
             continue
@@ -57,12 +59,14 @@ def search_in_google(books):
         if(start_url_len == end_url_len):
             unable_to_find.append(book)
             print("didn't find good url")
+            urls.append("didn't find good url")
+        lib[book] = urls[-1]
         bar.next()
     bar.finish()
-    return urls
+    return urls, lib
 
 def check_url(url):
-    print(url)
+    # print(url)
     contain_string = "https://lubimyczytac.pl/ksiazka/"
     if contain_string in url:
         return True
@@ -75,22 +79,18 @@ def get_book_category(response):
     category = category_href.get_text()
     print(category)
 
+def create_file_for_links(data):
+    with open("./url_for_books.json", "w", encoding='utf8') as outfile: 
+        json.dump(data, outfile, ensure_ascii=False)
+
 library = get_books_names()
 # # print(library[0])
-url = search_in_google(library)
+url, lib = search_in_google(library)
+print(lib)
+create_file_for_links(lib)
 # print("linki:\n")
 # print(url)
 # res = requests.get(url[0])
 
 # get_book_category(res)
-
-# check progress
-
-# bar = FillingCirclesBar('Processing', max=20)
-# for i in range(20):
-#     # Do some work
-#     print(i)
-#     bar.next()
-# bar.finish()
-
 
