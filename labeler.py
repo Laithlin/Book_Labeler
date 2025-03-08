@@ -2,6 +2,7 @@
 import os
 import requests
 from bs4 import BeautifulSoup
+from progress.bar import Bar, FillingCirclesBar
 
 try:
     from googlesearch import search
@@ -27,28 +28,37 @@ def check_rtf_doc_extensions_number(extension):
 
 def get_books_names():
     path_to_books = "/home/justyna/ksiegarnia/test/"
-
+    # files = os.listdir(path_to_books)
+    bar = Bar('Processing', max=len(os.listdir(path_to_books)))
+    # print(len(files))
     books = list()
-    for root, dirs, files in os.walk(path_to_books, topdown=False):
+    for _, _, files in os.walk(path_to_books, topdown=False):
         for file in files:
             # print(file)
             books.append(cut_extension(file) + " lubimyczytac")
+        bar.next()
 
+    bar.finish()
     return books
 
 def search_in_google(books):
     urls = []
+    unable_to_find = []
+    bar = FillingCirclesBar('Processing', max=len(books))
     for book in books:
         start_url_len = len(urls)
 
-        for j in search(book, tld="co.in", num=2, stop=2, pause=5):
+        for j in search(book, tld="co.in", num=1, stop=3, pause=5):
             if(check_url(j)):
                 urls.append(j)
             continue
 
         end_url_len = len(urls)
         if(start_url_len == end_url_len):
+            unable_to_find.append(book)
             print("didn't find good url")
+        bar.next()
+    bar.finish()
     return urls
 
 def check_url(url):
@@ -66,13 +76,21 @@ def get_book_category(response):
     print(category)
 
 library = get_books_names()
-# print(library[0])
+# # print(library[0])
 url = search_in_google(library)
-print("linki:\n")
-print(url)
+# print("linki:\n")
+# print(url)
 # res = requests.get(url[0])
 
 # get_book_category(res)
 
+# check progress
+
+# bar = FillingCirclesBar('Processing', max=20)
+# for i in range(20):
+#     # Do some work
+#     print(i)
+#     bar.next()
+# bar.finish()
 
 
