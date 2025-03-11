@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 from progress.bar import Bar, FillingCirclesBar
 import json
+import urllib.parse
 
 try:
     from googlesearch import search
@@ -28,7 +29,7 @@ def check_rtf_doc_extensions_number(extension):
         return True
 
 def get_books_names():
-    path_to_books = "/home/justyna/ksiegarnia/test/"
+    path_to_books = "/home/justyna/ksiegarnia/test_one_book/"
     # files = os.listdir(path_to_books)
     bar = Bar('Processing', max=len(os.listdir(path_to_books)))
     # print(len(files))
@@ -65,6 +66,25 @@ def search_in_google(books):
     bar.finish()
     return urls, lib
 
+def search_in_bing(books):
+    for book in books:
+        query = book.replace(" ", "+")
+        # url = urlunparse(("https", "www.bing.com", "/search", "", urlencode({"q": query}), ""))
+        url = urllib.parse.urlunparse(('https', 'bing.com', '/search', '', urllib.parse.urlencode({"q": book}), ""))
+        # print(query)
+        print(url)
+        custom_user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 OPR/109.0.0.0"
+        res = requests.get(url, headers={"User-Agent": custom_user_agent})
+
+        # print(res.status_code)
+        # print(res.text)
+        # # print(res.text)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        urls = soup.find_all("a")
+        print(urls)
+        # for url in urls:
+        #     print(url["href"])
+
 def check_url(url):
     # print(url)
     contain_string = "https://lubimyczytac.pl/ksiazka/"
@@ -85,9 +105,10 @@ def create_file_for_links(data):
 
 library = get_books_names()
 # # print(library[0])
-url, lib = search_in_google(library)
-print(lib)
-create_file_for_links(lib)
+search_in_bing(library)
+# url, lib = search_in_google(library)
+# print(lib)
+# create_file_for_links(lib)
 # print("linki:\n")
 # print(url)
 # res = requests.get(url[0])
