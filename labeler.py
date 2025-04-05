@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from progress.bar import Bar, FillingCirclesBar
 import json
 import urllib.parse
+from unidecode import unidecode
 
 try:
     from googlesearch import search
@@ -28,17 +29,30 @@ def check_rtf_doc_extensions_number(extension):
         print(extension)
         return True
 
+def get_title(book, dir_name):
+    print(dir_name)
+    print(book)
+    # return title
+
 def get_books_names():
     path_to_books = "/home/justyna/ksiegarnia/test_one_book/"
     # files = os.listdir(path_to_books)
     bar = Bar('Processing', max=len(os.listdir(path_to_books)))
+    # print(os.listdir(path_to_books))
+    # dirs = os.listdir(path_to_books)
+    # idx = 0
     # print(len(files))
     books = list()
     for _, _, files in os.walk(path_to_books, topdown=False):
+        # print(idx)
+        # print(files)
         for file in files:
             # print(file)
             # books.append(cut_extension(file) + " lubimyczytac")
+            # print(idx)
             books.append(cut_extension(file))
+            # get_title(cut_extension(file), dirs[idx])
+        # idx += 1
         bar.next()
 
     bar.finish()
@@ -88,24 +102,40 @@ def search_in_bing(books):
             if(check_url(link.get('href'))):
                 print(link.get('href'))
 
+def find_title_match(books_titles, book):
+    for title in books_titles:
+            print(title.get_text())
+            title_unidecode = unidecode(title.get_text())
+            if title_unidecode[0] == ' ':
+                title_unidecode = title_unidecode[1:-1]
+            print(title_unidecode)
+            print(unidecode(book))
+            if title_unidecode in unidecode(book):
+                print("jest")
+                return title
+    return "not found"
+
 def search_lubimyczytac(books): 
     for book in books:
         url = urllib.parse.urlunparse(('https', 'lubimyczytac.pl', '/szukaj/ksiazki', '', urllib.parse.urlencode({"phrase": book}), ""))
-        print(url)
+        # print(url)
+        # print(book)
         res = requests.get(url)
         # print(res.text)
         soup = BeautifulSoup(res.text, 'html.parser')
-        urls = soup.find_all("a")
-        # print(urls)
-        for link in urls:
-            link_href = link.get('href')
-            if(link_href == None):
-                print(link_href)
-            else:
-                # print(link_href + " check")
-                check_url(link_href)
-            # if(check_url(link.get('href'))):
-            #     print(link.get('href'))
+        b_titles = soup.find_all("a", "authorAllBooks__singleTextTitle float-left")
+        html_line = find_title_match(b_titles, book)
+        if html_line == "not found":
+            print("Couldn't find book")
+            continue
+        print(str(html_line))
+        print(html_line.attrs.get('href'))
+        book_url_end = html_line.attrs.get('href')
+        # print(str(html_line.get('href')))
+        print(book_url_end)
+        book_url = 'https://lubimyczytac.pl' + book_url_end
+        print(book_url)
+        return book_url
 
 # TODO stworzyc oddzielna funkcje do wyciagania tytulu ksiazki
 # jak bede miala tytul to latwo wyszukac odpowiedni url
@@ -133,7 +163,7 @@ def create_file_for_links(data):
         json.dump(data, outfile, ensure_ascii=False)
 
 library = get_books_names()
-search_lubimyczytac(library)
+b_url = search_lubimyczytac(library)
 # # print(library[0])
 # search_in_bing(library)
 # url, lib = search_in_google(library)
