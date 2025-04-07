@@ -25,7 +25,7 @@ def check_rtf_doc_extensions_number(extension):
         return True
 
 def get_books_names():
-    path_to_books = "/home/justyna/ksiegarnia/test/"
+    path_to_books = "/home/justyna/ksiegarnia/Ebooki/"
     bar = Bar('Processing', max=len(os.listdir(path_to_books)))
     books = list()
     for _, _, files in os.walk(path_to_books, topdown=False):
@@ -38,20 +38,20 @@ def get_books_names():
 
 def find_title_match(books_titles, book):
     for title in books_titles:
-            print(title.get_text())
+            # print(title.get_text())
             title_unidecode = unidecode(title.get_text())
             if title_unidecode[0] == ' ':
                 title_unidecode = title_unidecode[1:-1]
-            print(title_unidecode)
-            print(unidecode(book))
+            # print(title_unidecode)
+            # print(unidecode(book))
             if title_unidecode in unidecode(book):
-                print("jest")
+                # print("jest")
                 return title
     return "not found"
 
 def search_lubimyczytac(books):
     book_url_dict = {}
-    bar = Bar('Processing', max=len(os.listdir(len(books))))
+    bar = Bar('Processing', max=len(books))
     for book in books:
         url = urllib.parse.urlunparse(('https', 'lubimyczytac.pl', '/szukaj/ksiazki', '', urllib.parse.urlencode({"phrase": book}), ""))
         # print(url)
@@ -72,38 +72,28 @@ def search_lubimyczytac(books):
         # print(book_url_end)
         book_url = 'https://lubimyczytac.pl' + book_url_end
         # print(book_url)
-        book_url_dict[book] = book_url
+        book_category = get_book_category(book_url)
+        # print(book_category)
+        book_url_dict[book] = [book_url, book_category]
         bar.next()
     bar.finish()
     return book_url_dict
 
-# TODO stworzyc oddzielna funkcje do wyciagania tytulu ksiazki
-# jak bede miala tytul to latwo wyszukac odpowiedni url
-
-# TODO zrobic porzadek w kodzie bo juz sie gubie co jest od czego
-
-def get_book_category(response):
+def get_book_category(url):
+    response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     category_href = soup.find("a", "book__category d-sm-block d-none")
     # print(category_href)
     category = category_href.get_text()
-    print(category)
+    # print(category)
+    return category
 
-def create_file_for_links(data):
-    with open("./url_for_books.json", "w", encoding='utf8') as outfile: 
+def create_file_for_books(data):
+    with open("./data_for_books.json", "w", encoding='utf8') as outfile: 
         json.dump(data, outfile, ensure_ascii=False)
 
 library = get_books_names()
-lib_url = search_lubimyczytac(library)
-print(lib_url)
-# # print(library[0])
-# search_in_bing(library)
-# url, lib = search_in_google(library)
-# print(lib)
-# create_file_for_links(lib)
-# print("linki:\n")
-# print(url)
-# res = requests.get(url[0])
-
-# get_book_category(res)
+lib_url_cat = search_lubimyczytac(library)
+print(lib_url_cat)
+create_file_for_books(lib_url_cat)
 
